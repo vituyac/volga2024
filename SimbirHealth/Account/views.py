@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import *
 from .serializers import *
 from rest_framework import status
@@ -10,6 +10,8 @@ from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.exceptions import NotFound
+from django.http import Http404
     
 class RegistrationAPIView(generics.CreateAPIView):
     serializer_class = UserSerializer
@@ -47,3 +49,55 @@ class MeAPIView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+    
+class GetPostAccounts(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        queryset = User.objects.exclude(is_superuser=True)
+        from_p = int(request.GET.get('from', 0))
+        count_p = int(request.GET.get('count', queryset.__len__()))
+        queryset = User.objects.exclude(is_superuser=True)[from_p:from_p + count_p]
+        serializer = UserNoPSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = UserRolesSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class PutDelAccounts(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = UserRolesSerializer
+    queryset = User.objects.all()
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance == request.user:
+            return Response({"detail": "Вы не можете удалить себя."}, status=status.HTTP_403_FORBIDDEN)
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class GetDoctors(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+    queryset = User.objects.filter(is_doctor=True)
+    
+class GetDoctorsbyID(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+    queryset = User.objects.filter(is_doctor=True)
+    
+    def get_object(self):
+        try:
+            obj = super().get_object()
+        except Http404:
+            raise NotFound("Доктор с указанным ID не найден.")
+        return obj
+
+    
