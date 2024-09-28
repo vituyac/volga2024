@@ -57,7 +57,7 @@ class GetPostAccounts(APIView):
         queryset = User.objects.exclude(is_superuser=True)
         from_p = int(request.GET.get('from', 0))
         count_p = int(request.GET.get('count', queryset.__len__()))
-        queryset = User.objects.exclude(is_superuser=True)[from_p:from_p + count_p]
+        queryset = User.objects.exclude(is_superuser=True)[from_p-1:from_p + count_p-1]
         serializer = UserNoPSerializer(queryset, many=True)
         return Response(serializer.data)
     
