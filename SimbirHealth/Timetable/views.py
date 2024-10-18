@@ -260,7 +260,7 @@ def validate_rooms(self, serializer, doc_id, hospital_id, room_number, fr, to, c
             else:
                 raise NotFound(f"Кабинет с номером {room_number} в больнице с id {hospital_id} не найден.")
         else:
-            raise NotFound(f"Больница с id {hospital_id} не найден.")
+            raise NotFound(f"Больница с id {hospital_id} не найдена.")
     else:
         raise NotFound(f"Доктор с id {doc_id} не найден.")
 

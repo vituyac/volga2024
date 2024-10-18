@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'Account',
     'Hospital',
     'Timetable',
+    'Document',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
