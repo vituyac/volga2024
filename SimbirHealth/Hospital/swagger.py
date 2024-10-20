@@ -6,7 +6,7 @@ from . import urls as app_urls
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Account API",
+        title="Hospital API",
         default_version='v1',
         description="API documentation for Hospital service",
     ),

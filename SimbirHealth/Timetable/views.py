@@ -23,6 +23,8 @@ from django.core.exceptions import ValidationError
 from rest_framework.exceptions import ValidationError as DRFValidationError
 import pytz
 from django.utils.dateparse import parse_datetime
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 class TimetableCreateAPIView(generics.CreateAPIView):
@@ -30,7 +32,14 @@ class TimetableCreateAPIView(generics.CreateAPIView):
     serializer_class = TimetableSerializer
     queryset = Timetable.objects.all()
     
-    def create(self, request, *args, **kwargs):
+    @swagger_auto_schema(
+        operation_summary="Создание новой записи в расписании",
+        operation_description='''**Доктор по умолчанию с id 3.**Только администраторы и менеджеры. Нельзя изменить если есть
+            записавшиеся на прием. {from} и {to} - количество минут всегда кратно 30,
+            секунды всегда 0 (пример: “2024-04-25T11:30:00Z”, “2024-04-25T12:00:00Z”). {to} >
+            {from}. Разница между {to} и {from} не должна превышать 12 часов''',
+    )
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         doc_id = request.data.get('doctorId')
@@ -51,6 +60,16 @@ class TimetableUDAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TimetableSerializer
     queryset = Timetable.objects.all()
     
+    http_method_names = ['put', 'delete']
+    
+    
+    @swagger_auto_schema(
+        operation_summary="Обновление записи расписания",
+        operation_description='''Только администраторы и менеджеры. Нельзя изменить если есть
+            записавшиеся на прием. {from} и {to} - количество минут всегда кратно 30,
+            секунды всегда 0 (пример: “2024-04-25T11:30:00Z”, “2024-04-25T12:00:00Z”). {to} >
+            {from}. Разница между {to} и {from} не должна превышать 12 часов''',
+    )
     def put(self, request, pk):
         timetable_instance = self.get_object()
         serializer = self.get_serializer(timetable_instance, data=request.data)
@@ -68,6 +87,10 @@ class TimetableUDAPIView(generics.RetrieveUpdateDestroyAPIView):
                 raise DRFValidationError({"detail": e.messages[0]})
         return Response(serializer.errors, status=400)
     
+    @swagger_auto_schema(
+        operation_summary="Удаление записи расписания",
+        operation_description="Только администраторы и менеджеры",
+    )
     def delete(self, request, pk):
         timetable_instance = self.get_object()
         timetable_instance.delete()
@@ -83,6 +106,30 @@ class TimetableDoctorView(APIView):
             self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
     
+    
+    @swagger_auto_schema(
+        operation_summary="Получение расписания врача по Id",
+        operation_description="Только авторизованные пользователи",
+        manual_parameters=[
+            openapi.Parameter(
+                'from',
+                openapi.IN_QUERY,
+                description="string(ISO8601)",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+            openapi.Parameter(
+                'to',
+                openapi.IN_QUERY,
+                description="string(ISO8601)",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+        ],
+        responses={
+            200: TimetableSerializer(many=True),
+        }
+    )
     def get(self, request, pk):
         from_param = request.GET.get('from')
         to_param = request.GET.get('to')
@@ -103,6 +150,10 @@ class TimetableDoctorView(APIView):
 
         return Response(list(timetables.values()))
     
+    @swagger_auto_schema(
+        operation_summary="Удаление записей расписания доктора",
+        operation_description="Только администраторы и менеджеры",
+    )
     def delete(self, request, pk, *args, **kwargs):
         doc_id = pk
         deleted_count, _ = Timetable.objects.filter(doctorId=doc_id).delete()
@@ -121,6 +172,29 @@ class TimetableHospitalView(APIView):
             self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
     
+    @swagger_auto_schema(
+        operation_summary="Получение расписания больницы по Id",
+        operation_description="Только авторизованные пользователи",
+        manual_parameters=[
+            openapi.Parameter(
+                'from',
+                openapi.IN_QUERY,
+                description="string(ISO8601)",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+            openapi.Parameter(
+                'to',
+                openapi.IN_QUERY,
+                description="string(ISO8601)",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+        ],
+        responses={
+            200: TimetableSerializer(many=True),
+        }
+    )
     def get(self, request, pk):
         from_param = request.GET.get('from')
         to_param = request.GET.get('to')
@@ -141,6 +215,11 @@ class TimetableHospitalView(APIView):
 
         return Response(list(timetables.values()))
     
+    @swagger_auto_schema(
+        operation_summary="Удаление записей расписания больницы",
+        operation_description="Только администраторы и менеджеры",
+        
+    )
     def delete(self, request, pk, *args, **kwargs):
         hospital_id = pk
         deleted_count, _ = Timetable.objects.filter(hospitalId=hospital_id).delete()
@@ -153,6 +232,32 @@ class TimetableHospitalView(APIView):
 class TimetableHospitalRoomsView(generics.ListAPIView):
     serializer_class = TimetableSerializer
     permission_classes=[IsManagerDoctor]
+    
+    @swagger_auto_schema(
+        operation_summary="Получение расписания кабинета больницы",
+        operation_description="Только администраторы и менеджеры и врачи",
+        manual_parameters=[
+            openapi.Parameter(
+                'from',
+                openapi.IN_QUERY,
+                description="string(ISO8601)",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+            openapi.Parameter(
+                'to',
+                openapi.IN_QUERY,
+                description="string(ISO8601)",
+                type=openapi.TYPE_INTEGER,
+                required=False
+            ),
+        ],
+        responses={
+            200: TimetableSerializer(many=True),
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
     
     def get_queryset(self):
         hospital_pk = self.kwargs.get('pk')
@@ -179,6 +284,24 @@ class TimetableHospitalRoomsView(generics.ListAPIView):
 class TimetableAddAppoRoomsView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Timetable.objects.none()
+        return super().get_queryset()
+
+    def get_serializer_class(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return None 
+        return super().get_serializer_class()
+    
+    @swagger_auto_schema(
+        operation_summary="Получение свободных талонов на приём",
+        operation_description='''Каждые 30 минут из записи расписания - это один талон. Если в сущности Timetable from=2024-04-25T11:00:00Z, to=2024-04-25T12:30:00Z, то
+        14 запись доступна на: 2024-04-25T11:00:00Z, 2024-04-25T11:30:00Z, 2024-04-25T12:00:00Z. Только авторизованные пользователи''',
+        responses={
+            200: "Список свободных талонов",
+        }
+    )
     def get(self, request, pk):
         timetable = Timetable.objects.filter(id=pk).first()
         
@@ -199,6 +322,23 @@ class TimetableAddAppoRoomsView(generics.ListCreateAPIView):
 
         return Response(available_slots, status=status.HTTP_200_OK)
     
+    
+    @swagger_auto_schema(
+        operation_summary="Записаться на приём",
+        operation_description="Только авторизованные пользователи",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'time': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    title="time",
+                    description="ISO8601"
+                ),
+            },
+            required=['time'],
+            description="Записаться на приём"
+        ),
+    )
     def post(self, request, pk):
         serializer = TicketSerializer(data=request.data)
         if serializer.is_valid():
@@ -229,7 +369,11 @@ class TimetableAddAppoRoomsView(generics.ListCreateAPIView):
 class DelTicketView(generics.DestroyAPIView):
     queryset=Ticket.objects.all()
     
-    def destroy(self, request, *args, **kwargs):
+    @swagger_auto_schema(
+        operation_summary="Отменить запись на приём",
+        operation_description="Только администраторы, менеджеры, и записавшийся пользователь",
+    )
+    def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         
         if request.user.is_authenticated:

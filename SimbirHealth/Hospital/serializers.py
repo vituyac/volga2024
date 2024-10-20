@@ -7,7 +7,7 @@ class HospitalSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Hospital
-        fields = ('name', 'address', 'contactPhone', 'rooms')
+        fields = ('id', 'name', 'address', 'contactPhone', 'rooms')
         
     def get_rooms(self, obj):
         return [room.number for room in obj.rooms.all()]

@@ -22,13 +22,25 @@ from rest_framework.exceptions import PermissionDenied, NotAuthenticated
 from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError
 from rest_framework.exceptions import ValidationError as DRFValidationError
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 import pytz
 from django.utils.dateparse import parse_datetime
 
 class GetHistoryView(generics.ListAPIView):
     serializer_class = HistorySerializer
 
+    @swagger_auto_schema(
+        operation_summary="Получение истории посещений и назначений аккаунта",
+        operation_description="Возвращает записи где {pacientId}={id}. Только врачи и аккаунт, которому принадлежит история",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return History.objects.none()
+        
         pk = int(self.kwargs.get('pk'))
 
         if not self.request.user.is_authenticated:
@@ -45,11 +57,17 @@ class HistoryRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = HistorySerializer
     queryset = History.objects.all()
     
+    http_method_names = ['get', 'put']
+    
     def get_permissions(self):
         if self.request.method in ['GET']:
             self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
     
+    @swagger_auto_schema(
+        operation_summary="Получение подробной информации о посещении и назначениях",
+        operation_description="Только врачи и аккаунт, которому принадлежит история",
+    )
     def get(self, request, pk, *args, **kwargs):
         
         queryset = History.objects.filter(id=pk).first()
@@ -60,6 +78,10 @@ class HistoryRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         else:
             raise PermissionDenied("У вас недостаточно прав для выполнения данного действия.")
         
+    @swagger_auto_schema(
+        operation_summary="Обновление истории посещения и назначения",
+        operation_description="Только администраторы и менеджеры и врачи. {pacientId} - с ролью User",
+    )
     def put(self, request, pk):
         history_instance = self.get_object()
         serializer = self.get_serializer(history_instance, data=request.data)
@@ -86,7 +108,13 @@ class HistoryCreateAPIView(generics.CreateAPIView):
     queryset = History.objects.all()
         
     
-    def create(self, request, *args, **kwargs):
+    @swagger_auto_schema(
+        operation_summary="Создание истории посещения и назначения",
+        operation_description="Только администраторы и менеджеры и врачи. {pacientId} - с ролью User",
+        responses={201: HistorySerializer},
+        request_body=HistorySerializer,
+    )
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         

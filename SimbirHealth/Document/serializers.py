@@ -6,5 +6,5 @@ class HistorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = History
-        fields = ('date', 'pacientId', 'hospitalId', 'doctorId', 'room', 'data')
+        fields = ('id', 'date', 'pacientId', 'hospitalId', 'doctorId', 'room', 'data')
         

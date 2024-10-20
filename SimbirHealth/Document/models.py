@@ -14,3 +14,9 @@ class History(models.Model):
     def __str__(self):
         return f'{self.pacientId}'
     
+from django.utils import timezone
+
+class FirstConfig(models.Model):
+    is_made = models.BooleanField(blank=False, null=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    

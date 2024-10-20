@@ -6,7 +6,7 @@ class TimetableSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Timetable
-        fields = ('hospitalId', 'doctorId', 'fr', 'to', 'room')
+        fields = ('id', 'hospitalId', 'doctorId', 'fr', 'to', 'room')
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -22,5 +22,5 @@ class TicketSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Ticket
-        fields = ('time',)
+        fields = ('id', 'time',)
     

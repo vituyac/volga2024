@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('lastName', 'firstName', 'username', 'password')
+        fields = ('id', 'lastName', 'firstName', 'username', 'password')
         
 class UserNoPSerializer(serializers.ModelSerializer):
     firstName = serializers.CharField(source='first_name')
@@ -20,7 +20,7 @@ class UserNoPSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('lastName', 'firstName', 'username')
+        fields = ('id', 'lastName', 'firstName', 'username')
         
 class UserRolesSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
@@ -35,7 +35,7 @@ class UserRolesSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ('lastName', 'firstName', 'username', 'password', 'roles')
+        fields = ('id', 'lastName', 'firstName', 'username', 'password', 'roles')
 
     def create(self, validated_data):
         roles = validated_data.pop('roles', ['none'])
@@ -74,3 +74,11 @@ class UserRolesSerializer(serializers.ModelSerializer):
         user.is_manager = 'manager' in roles
         user.save()
         
+class UserUpSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    firstName = serializers.CharField(source='first_name')
+    lastName = serializers.CharField(source='last_name')
+    
+    class Meta:
+        model = User
+        fields = ('id', 'lastName', 'firstName', 'password')

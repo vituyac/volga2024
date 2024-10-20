@@ -3,6 +3,8 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from . import urls as app_urls
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import authentication
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -10,9 +12,9 @@ schema_view = get_schema_view(
         default_version='v1',
         description="API documentation for Account service",
     ),
+    patterns=app_urls.urlpatterns,
+    authentication_classes=(authentication.BasicAuthentication,),
     public=True,
-    permission_classes=(permissions.AllowAny,),
-    patterns=app_urls.urlpatterns
 )
 
 urlpatterns = [
