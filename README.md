@@ -62,5 +62,6 @@
 
 # Создание записи о новой больнице (`/Hospitals/`)
 
-![Скриншот 3](https://github.com/user-attachments/assets/25809094-656e-4f51-8c82-b306cca85cc8)  
+![image](https://github.com/user-attachments/assets/4e7ad1b5-5665-47a0-b21a-843ed7cc8d1e).
+ 
 
