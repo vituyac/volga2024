@@ -88,6 +88,18 @@ WSGI_APPLICATION = 'core.wsgi.application'
 #     }
 # }
 
+# ПОДКЛЮЧЕНИЕ К ЛОКАЛЬНОМУ PostgreSQL
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'postgres',
+#         'PASSWORD': '1234',
+#         'HOST': 'localhost',  
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': dj_database_url.config(default='postgres://postgres:postgres@db:5432/postgres')
 }
