@@ -53,8 +53,9 @@
 ## Пример выполнения запросов:
 
 1) **Изменение администратора аккаунта по ID** (`/Accounts/{id}/`):
-   ![image](https://github.com/user-attachments/assets/9e5ca0a0-500d-4b5e-8c40-e645ebee5f22)
-   ![image](https://github.com/user-attachments/assets/8cffb7a9-1150-40d8-86e4-c04ae309ec5d)
+![image](https://github.com/user-attachments/assets/65ac5d98-7b64-4ce8-9220-b383d52ccc5f)
+![image](https://github.com/user-attachments/assets/8b520dff-34ac-4207-a364-73bd5ded3439)
 
 2) **Создание записи о новой больнице** (`/Hospitals/`):
-   ![image](https://github.com/user-attachments/assets/9025ab2a-b525-4a3d-b71a-5541f5a34c58)
+![image](https://github.com/user-attachments/assets/25809094-656e-4f51-8c82-b306cca85cc8)
+
