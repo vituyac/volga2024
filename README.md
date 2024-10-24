@@ -52,10 +52,15 @@
 
 ## Пример выполнения запросов:
 
-1) **Изменение администратора аккаунта по ID** (`/Accounts/{id}/`):
-![image](https://github.com/user-attachments/assets/65ac5d98-7b64-4ce8-9220-b383d52ccc5f)
-![image](https://github.com/user-attachments/assets/8b520dff-34ac-4207-a364-73bd5ded3439)
+# Изменение администратором аккаунта по ID (`/Accounts/{id}/`)
 
-2) **Создание записи о новой больнице** (`/Hospitals/`):
-![image](https://github.com/user-attachments/assets/25809094-656e-4f51-8c82-b306cca85cc8)
+![Скриншот 1](https://github.com/user-attachments/assets/65ac5d98-7b64-4ce8-9220-b383d52ccc5f)  
+
+![Скриншот 2](https://github.com/user-attachments/assets/8b520dff-34ac-4207-a364-73bd5ded3439)  
+
+---
+
+# Создание записи о новой больнице (`/Hospitals/`)
+
+![Скриншот 3](https://github.com/user-attachments/assets/25809094-656e-4f51-8c82-b306cca85cc8)  
 
